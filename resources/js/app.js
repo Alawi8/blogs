@@ -1,5 +1,5 @@
 import './bootstrap';
-
+import './quizManager.js';
 import Alpine from 'alpinejs';
 
 window.Alpine = Alpine;
