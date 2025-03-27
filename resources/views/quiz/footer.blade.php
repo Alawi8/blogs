@@ -7,7 +7,9 @@
             ⚙ <span></span>
         </button>
         <!-- 🔲 Grid Option -->
-        <button class="bg-green-500 text-white px-4 py-2 rounded-md flex items-center space-x-2 hover:bg-green-600">
+        <button 
+        @click="showFilterPopup = true "
+        class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
             🔲 <span></span>
         </button>
         <!-- ❓ Help -->

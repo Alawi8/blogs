@@ -6,7 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\Question;
 use App\Models\Test;
 
-class QuestionController extends Controller
+class AdminQuestionController extends Controller
 {
     public function index()
     {

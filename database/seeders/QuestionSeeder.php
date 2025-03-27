@@ -3,17 +3,24 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
+use App\Models\Test;
 use App\Models\Question;
 use App\Models\Answer;
 use Carbon\Carbon;
 
 class QuestionSeeder extends Seeder
 {
-    /**
-     * update db to create qustions and answers 
-     */
     public function run()
     {
+        // ✅ إنشاء اختبار أو جلبه لو موجود
+        $test = Test::firstOrCreate(
+            ['title' => 'Medical Test'], // شرط التحقق
+            [
+                'description' => 'A test about medical knowledge',
+                'duration' => 30, // دقيقة
+            ]
+        );
+
         $medicalQuestions = [
             "What is the function of the liver in detoxification?",
             "Which organ is responsible for oxygenating blood?",
@@ -30,27 +37,24 @@ class QuestionSeeder extends Seeder
         $now = Carbon::now();
 
         foreach ($medicalQuestions as $questionText) {
-            // إنشاء السؤال في جدول `questions`
-            $question = Question::create([
-                'test_id' => 1, // تأكد من أن لديك اختبار رقم 1
+            $question = $test->questions()->create([
                 'question_text' => $questionText,
                 'created_at' => $now,
                 'updated_at' => $now
             ]);
 
-            // 
-            $correctAnswerIndex = rand(1, 4);
+            $correctIndex = rand(1, 4);
 
-            // create 
             for ($i = 1; $i <= 4; $i++) {
-                Answer::create([
-                    'question_id' => $question->id,
+                $question->answers()->create([
                     'answer_text' => "Option $i",
-                    'is_correct' => ($i === $correctAnswerIndex) ? true : false,
+                    'is_correct' => $i === $correctIndex,
                     'created_at' => $now,
                     'updated_at' => $now
                 ]);
             }
         }
+
+        echo "✅ Seeded medical test with questions and answers.\n";
     }
 }

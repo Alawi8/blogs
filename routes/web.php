@@ -4,49 +4,47 @@ use App\Http\Controllers\CSVImportController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\QuizApiController;
 use App\Http\Controllers\QuestionsListController;
-
-Route::get('/', function () {
-    return view('welcome');
-});
-
-
-Route::middleware(['auth'])->group(function () {
-    Route::get('/dashboard', function () {
-        return view('dashboard');
-    })->name('dashboard');
-
-    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
-    Route::get('api/questions', [QuizApiController::class, 'getQuestions']);
-    Route::get('/questions', [QuestionsListController::class, 'index']);
-    Route::post('/submit-answer', [QuizApiController::class, 'submitAnswer']);
-});
-
-Route::prefix('admin')->name('admin.')->group(function () {
-    Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
-    
-    //mangment questions
-    Route::resource('/questions', AdminQuestionsController::class)->except(['show', 'edit', 'update']);
-});
-
-
-
-Route::get('admin/questions', function () {
-    return view('admin.questions', ['tests' => \App\Models\Test::all()]);
-})->name('admin.questions');
-
+use App\Http\Controllers\Admin\TestController;
+use App\Http\Controllers\Admin\QuestionController;
 
 require __DIR__.'/auth.php';
 
+Route::get('/', function () {
+    return view('welcome');
+})->name('home');
 
-use Spatie\Permission\Middleware\PermissionMiddleware;
-
-// admin routes
+// dashboard routes
 Route::middleware(['auth', 'role:admin'])->group(function () {
+    Route::get('/dashboard', function () {
+        return view('dashboard');
+    })->name('dashboard');
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
     Route::get('/admin-dashboard', function () {
         return view('admin.dashboard');
     })->name('admin.dashboard');
+});
+
+//  qustions && answers routes
+// use App\Http\Controllers\UserAnswersController;
+// Route::middleware(["auth","role:admin"])->group(function(){
+//     Route::get('/questions', [QuestionsListController::class, 'index'])->middleware('qnf');
+//     Route::get('api/questions', [QuizApiController::class, 'getQuestions']);
+//     Route::post('api/submit-answer', [UserAnswersController::class, 'submitAnswer']);
+//     Route::get('/api/user-answers', [UserAnswerSController::class, 'getUserAnswers']);
+//     Route::get('/api/final-result', [QuizApiController::class, 'finalResult']);
+//     Route::post('/api/clear-answers', [UserAnswersController::class, 'clearAnswers']);
+
+//     Route::get('/tests', [TestController::class, 'index'])->name('admin.tests');
+//     Route::post('/tests', [TestController::class, 'store'])->name('admin.tests.store');
+//     Route::get('/admin/tests/{test}/questions', [TestController::class, 'questions'])->name('admin.tests.questions');
+//     // Route::resource('admin/questions', QuestionController::class)->names('admin.questions');
+
+// });
+// route admin page
+Route::prefix('admin')->name('admin.')->group(function () {
+    Route::view('/questions/index', 'admin.questions.index')->name('about');
 });
 
 // editor routes
@@ -61,49 +59,10 @@ Route::get('/test/{id}', function ($id) {
 });
 
 
-// import csv file route
-// use App\Http\Controllers\CSVImportController;
-// Route::post('import-questions', [CSVImportController::class, 'importQuestions']);
-
-use Illuminate\Http\Request;
-use App\Models\Answer;
-
-Route::post('/submit-test/{id}', function (Request $request, $id) {
-    $correctAnswers = 0;
-    $totalQuestions = count($request->except('_token'));
-
-    foreach ($request->except('_token') as $questionId => $answerId) {
-        $answer = Answer::where('id', $answerId)->where('is_correct', true)->first();
-        if ($answer) {
-            $correctAnswers++;
-        }
-    }
-
-    return redirect()->back()->with('message', "لقد أجبت على $correctAnswers من أصل $totalQuestions إجابة صحيحة!");
-});
-
-// // quiz routes
-use App\Models\Test;
-
-Route::get('/test/{id}', function ($id) {
-    $test = Test::with('questions.answers')->findOrFail($id);
-    return view('frontend.test', compact('test'));
-});
+use App\Http\Controllers\RoleController;
+use App\Http\Controllers\UserRoleController;
 
 
 
 
 
-/**
- * Fetch all quiz questions along with their answers.
- * GET /api/questions
- */
-
-
-/**
- * Secure route example (requires authentication via Sanctum or Passport)
- * GET /api/user
- */
-Route::middleware('auth:sanctum')->get('/user', function (\Illuminate\Http\Request $request) {
-    return $request->user();
-});

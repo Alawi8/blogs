@@ -1,7 +1,7 @@
 import './bootstrap';
-import './quizManager.js';
-import Alpine from 'alpinejs';
+import Alpine from "alpinejs";
+import './quiz2/quizManager';
+
 
 window.Alpine = Alpine;
-
 Alpine.start();

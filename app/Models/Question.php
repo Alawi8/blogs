@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -11,8 +12,12 @@ class Question extends Model
     protected $fillable = ['title', 'content', 'section'];
 
     public function answers()
-{
-    return $this->hasMany(Answer::class, 'question_id');
-}
+    {
+        return $this->hasMany(Answer::class, 'question_id');
+    }
 
+    public function test()
+    {
+        return $this->belongsTo(Test::class);
+    }
 }

@@ -4,7 +4,9 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Question;
-use Illuminate\Support\Facades\DB;
+use App\Models\Answer;
+use App\Models\UserAnswer;
+use Illuminate\Support\Facades\Auth;
 
 class QuizApiController extends Controller
 {
@@ -28,42 +30,21 @@ class QuizApiController extends Controller
      * @param \Illuminate\Http\Request $request
      * @return \Illuminate\Http\JsonResponse
      */
-    public function submitAnswer(Request $request)
+
+
+
+
+    public function finalResult()
     {
-        $request->validate([
-            'question_id' => 'required|exists:questions,id',
-            'answer_id' => 'required|exists:answers,id',
-        ]);
-    
-        $answer = Answer::find($request->answer_id);
-    
-        $userAnswer = UserAnswer::updateOrCreate(
-            [
-                'user_id' => auth()->id(),
-                'question_id' => $request->question_id,
-            ],
-            [
-                'answer_id' => $answer->id,
-                'is_correct' => $answer->is_correct,
-            ]
-        );
-    
+        $totalQuestions = UserAnswer::where('user_id', Auth::id())->count();
+        $correctAnswers = UserAnswer::where('user_id', Auth::id())->where('is_correct', true)->count();
+
+        $score = $totalQuestions > 0 ? round(($correctAnswers / $totalQuestions) * 100) : 0;
+
         return response()->json([
-            'message' => 'تم حفظ الإجابة',
-            'correct' => $answer->is_correct,
+            'score' => $score,
+            'correct' => $correctAnswers,
+            'total' => $totalQuestions,
         ]);
     }
-    public function finalResult(){
-    $totalQuestions = UserAnswer::where('user_id', auth()->id())->count();
-    $correctAnswers = UserAnswer::where('user_id', auth()->id())->where('is_correct', true)->count();
-
-    $score = $totalQuestions > 0 ? round(($correctAnswers / $totalQuestions) * 100) : 0;
-
-    return response()->json([
-        'score' => $score,
-        'correct' => $correctAnswers,
-        'total' => $totalQuestions,
-    ]);
-    }
-
 }
